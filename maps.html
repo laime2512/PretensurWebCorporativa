@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="http://l2.io/ip.js?var=my_ip"></script>
+<script type="text/javascript" language="JavaScript" src="http://www.geoplugin.net/javascript.gp"></script>
+<script>
+function get_current_position() {
+    document.getElementById("out").innerHTML = "<p>Locating...</p>";
+ 
+    var geo_options = {enableHighAccuracy:true, maximumAge:30000, timeout:27000};
+    if (navigator.geolocation) {
+        // geolocation IS available
+        navigator.geolocation.getCurrentPosition(geo_success, geo_error, geo_options);
+    } else {
+        // geolocation IS NOT available
+        geo_is_not_available();  
+    }
+}
+ 
+function geo_success(position) {
+    var latitude  = position.coords.latitude;
+    var longitude = position.coords.longitude;
+    var accuracy  = position.coords.accuracy;
+ 
+    document.getElementById("out").innerHTML = '<p>Latitude: ' + latitude + '&deg;<br>Longitude: ' + longitude + '&deg;<br>Accuracy: ' + accuracy + ' m</p>';
+ 
+    var img = new Image();
+    img.src = "http://maps.google.com/maps/api/staticmap?sensor=false&center=" + latitude + "," + longitude + "&zoom=14&size=600x200kers=color:blue|label:S|" + latitude + ',' + longitude;
+    img.src = "https://maps.googleapis.com/maps/api/staticmap?center=" + latitude + "," + longitude + "&zoom=14&size=400x400&key=AIzaSyDsuKCPuHaGAzd8ZCrHEMjYcWQQ4s8pNn0";
+    
+    document.getElementById("out").appendChild(img);
+}
+ 
+function geo_error(error) {
+    document.getElementById("out").innerHTML = '<p>ERROR(' + error.code + '): ' + error.message + '</p>';
+}
+ 
+function geo_is_not_available() {
+    var my_status      = geoplugin_status();      // '200'
+    var my_latitude    = geoplugin_latitude();    // '42.814098'
+    var my_longitude   = geoplugin_longitude();   // '-1.6412'
+    var my_city        = geoplugin_city();        // 'Pamplona'
+    var my_region      = geoplugin_region();      // 'Navarre'
+    var my_countryName = geoplugin_countryName(); // 'Spain'
+ 
+    if (my_status == 404 ) {
+        // 200 - OK
+        // 206 - Only country data returned, no city values found
+        // 404 - No data found for the IP
+        var error = {
+            code : 404,
+            message : "Error 404 - No data found for the IP"
+        };
+        geo_error(error);
+        return;
+    }
+ 
+    var position = {
+        coords : {
+            latitude: my_latitude,
+            longitude: my_longitude
+        },  
+        address : {
+            city: my_city,
+            region: my_region,
+            country: my_countryName
+        }
+    };
+    geo_success(position);
+}
+</script>
+</head>
+<body>
+<div>
+    <button id="btnGet" onclick="get_current_position()">Find my location</button>
+</div>
+<div id="out"></div>
+</body>
+</html>
